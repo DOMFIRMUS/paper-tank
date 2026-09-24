@@ -1,0 +1,10 @@
+contrast,normaliser,ratio,meas_lo,meas_hi,window_lo,window_hi
+"covered V2-26, 26 Aug (u 3.19) / 2 Sep (u 0), Rs 733/731",none,1.46364,1.2409,1.73148,0.596265,3.59275
+"uncovered strong (W04, W06) / weak (W01, W03); Rs ratio 5.3",none,3.08503,,,1.6349,5.82139
+"cover V2 (25 Aug) / cover V1 (24 Aug), strong advection",none,0.72515,0.555199,0.875526,0.295416,1.78001
+"covered V2-26, 26 Aug (u 3.19) / 2 Sep (u 0), Rs 733/731",VPD,1.58695,1.34545,1.87737,1.07577,2.34104
+"uncovered strong (W04, W06) / weak (W01, W03); Rs ratio 5.3",VPD,2.78604,,,2.1164,3.66757
+"cover V2 (25 Aug) / cover V1 (24 Aug), strong advection",VPD,0.720022,0.551273,0.869335,0.488092,1.06216
+"covered V2-26, 26 Aug (u 3.19) / 2 Sep (u 0), Rs 733/731",dE,2.05086,1.73876,2.42617,1.26059,3.33653
+"uncovered strong (W04, W06) / weak (W01, W03); Rs ratio 5.3",dE,2.2423,,,1.58943,3.16336
+"cover V2 (25 Aug) / cover V1 (24 Aug), strong advection",dE,1.08749,0.832622,1.31301,0.668447,1.76924

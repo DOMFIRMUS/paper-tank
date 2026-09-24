@@ -1,0 +1,2 @@
+n_uncovered,n_covered,median_uncovered,median_covered,MW_U,MW_p_exact,MW_p_asymptotic_cc,perm_p_exact,n_permutations,welch_t,welch_df,welch_p,HL_shift,HL_lo,HL_hi,cohen_d,hedges_g,g_lo,g_hi,trend_rho_uncovered,trend_p_uncovered,trend_rho_covered,trend_p_covered,ljungbox_p_uncovered,ljungbox_p_covered
+10,9,1.3802,0.65406,84,0.000649505,0.00166934,0.000216502,92378,5.43304,11.7251,0.000164652,0.696107,0.436485,0.931702,2.39401,2.28681,1.11841,3.41745,0.915152,0.000204472,0.166667,0.668231,0.27453,0.604198

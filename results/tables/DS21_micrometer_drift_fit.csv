@@ -1,0 +1,4 @@
+variant,slope_mm_per_K,lo,hi,p,n,loo_min,loo_max
+"mass-equivalent, mean of probes",0.111477,-0.0178769,0.240831,0.0821143,10,0.0539672,0.179417
+"as read (no expansion in well), probe 1",0.214162,-0.0967616,0.525085,0.150868,10,0.167102,0.256508
+"as read (no expansion in well), mean of probes",0.188564,0.060429,0.316699,0.00945055,10,0.130593,0.255389

@@ -1,0 +1,23 @@
+# Local only, never versioned: manuscript, submission files, internal review,
+# original Zenodo deposit (see private/LEIA-ME.txt)
+private/
+
+# Regenerable outputs (python code/run_all.py)
+data/processed/consolidated_series.csv
+results/figures/*.png
+!results/figures/*_preview.png
+results/legacy_v1/
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Office and OS files
+~$*
+*.tmp
+Thumbs.db
+desktop.ini
+.DS_Store

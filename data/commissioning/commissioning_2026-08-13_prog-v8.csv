@@ -1,0 +1,7 @@
+"TOA5","CR1000","CR1000","87360","CR1000.Std.31.08","CPU:codigo_sensores_v8.CR1","53602","dados_tanque"
+"TIMESTAMP","RECORD","BattV_Avg","PTemp_C_Avg","irradiancia_Avg","WS_ms_Avg","T108_C_Avg","T108_C_2_Avg","T108_C_3_Avg","nivel_tanque_Avg","nivel_tanque_Max","nivel_tanque_Min","nivel_tanque_Std","AirTC_Avg","RH_Min","ETos","Rso","irradiancia_licor_Avg","irradiacaototal_Tot"
+"TS","RN","Volts","Deg C","w/m2","meters/second","Deg C","Deg C","Deg C","mm","mm","mm","mm","Deg C","%","Deg C","Deg C","W/m^2","MJ/m^2"
+"","","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Avg","Max","Min","Std","Avg","Min","ETXs","Rso","Avg","Tot"
+"2026-08-13 14:49:00",0,13.07,29.6,0.679,0.34,26.06,26.6,25.79,221.5,221.5,221.5,0,28.59,56.82,0.085,2.376,0.611,2.443578E-05
+"2026-08-13 14:50:00",1,13.07,29.58,0.679,0.227,26.06,26.6,25.81,221.5,221.5,221.5,0,28.51,56.9,0.305,2.367,0.611,3.665316E-05
+"2026-08-13 14:51:00",2,13.07,29.58,0.679,0.213,26.08,26.56,25.82,221.6,221.7,221.5,0.112,28.5,57.01,0.311,2.354,0.611,3.665316E-05

@@ -1,0 +1,17 @@
+comparison,label,probe,S_pct
+C1,"18 vs 17 Aug, V1",dE_kPa,66.1775
+C1,"18 vs 17 Aug, V1",dE_p2_kPa,67.7958
+C1,"18 vs 17 Aug, V1",dE_p3_kPa,66.1371
+C1,"18 vs 17 Aug, V1",dE_pmean_kPa,66.7491
+C2,"21 vs 20 Aug, V1",dE_kPa,59.8565
+C2,"21 vs 20 Aug, V1",dE_p2_kPa,50.5642
+C2,"21 vs 20 Aug, V1",dE_p3_kPa,59.2564
+C2,"21 vs 20 Aug, V1",dE_pmean_kPa,56.3757
+C3,"24 Aug paired, V1",dE_kPa,75.2498
+C3,"24 Aug paired, V1",dE_p2_kPa,62.6488
+C3,"24 Aug paired, V1",dE_p3_kPa,75.738
+C3,"24 Aug paired, V1",dE_pmean_kPa,71.1545
+C4,"25 vs 24 Aug, V2",dE_kPa,73.0843
+C4,"25 vs 24 Aug, V2",dE_p2_kPa,72.2428
+C4,"25 vs 24 Aug, V2",dE_p3_kPa,73.7113
+C4,"25 vs 24 Aug, V2",dE_pmean_kPa,72.8633

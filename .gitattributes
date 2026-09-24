@@ -1,0 +1,16 @@
+# Normalise line endings of text files...
+* text=auto
+
+# ...but keep the logger exports and commissioning records byte-for-byte as
+# exported (CRLF), so their checksums match the Zenodo deposit
+data/raw/** -text
+data/commissioning/** -text
+*.CR1 -text
+
+# Binary files
+*.pdf binary
+*.png binary
+*.jpg binary
+*.docx binary
+*.xlsx binary
+*.npz binary

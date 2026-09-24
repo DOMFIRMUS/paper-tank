@@ -1,0 +1,99 @@
+'CR1000
+'Created by Short Cut (4.8)
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public irradiancia
+Public WS_ms
+Public WindDir
+Public T108_C
+Public T108_C_2
+Public T108_C_3
+Public nivel_tanque
+Public AirTC
+Public RH
+Public irradiancia_licor
+Public irradiacaototal
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units irradiancia=w/m2
+Units WS_ms=meters/second
+Units WindDir=degrees
+Units T108_C=Deg C
+Units T108_C_2=Deg C
+Units T108_C_3=Deg C
+Units nivel_tanque=mm
+Units AirTC=Deg C
+Units RH=%
+Units irradiancia_licor=W/m^2
+Units irradiacaototal=MJ/m^2
+
+'Define Data Tables
+DataTable(dados_tanque,True,-1)
+	DataInterval(0,1,Min,10)
+	Average(1,BattV,FP2,False)
+	Average(1,PTemp_C,FP2,False)
+	Average(1,irradiancia,FP2,False)
+	Average(1,WS_ms,FP2,False)
+	Average(1,T108_C,FP2,False)
+	Average(1,T108_C_2,FP2,False)
+	Average(1,T108_C_3,FP2,False)
+	Average(1,nivel_tanque,FP2,False)
+	Maximum(1,nivel_tanque,FP2,False,False)
+	Minimum(1,nivel_tanque,FP2,False,False)
+	StdDev(1,nivel_tanque,FP2,False)
+	Average(1,AirTC,FP2,False)
+	Minimum(1,RH,FP2,False,False)
+	ETsz(AirTC,RH,WS_ms,irradiancia,325.1231,8.0476,10,0.09,0,FP2,False)
+	FieldNames("ETos,Rso")
+	Average(1,irradiancia_licor,FP2,False)
+	Totalize(1,irradiacaototal,IEEE4,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(20,Sec,1,0)
+		'Default CR1000 Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR1000 Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,_60Hz)
+		'Generic Differential Voltage measurements 'irradiancia'
+		VoltDiff(irradiancia,1,mV250,1,True,0,_60Hz,9.9542106311,0)
+		'034A/034B Wind Speed & Direction Sensor measurements 'WS_ms' and 'WindDir'
+		PulseCount(WS_ms,1,1,2,1,0.7989,0.28)
+		If WS_ms=0.28 Then WS_ms=0
+		BrHalf(WindDir,1,mV2500,3,1,1,2500,True,20000,_60Hz,720,0)
+		If WindDir>=360 Or WindDir<0 Then WindDir=0
+		'108 Temperature Probe measurement 'T108_C'
+		Therm108(T108_C,1,4,2,0,_60Hz,1,0)
+		'108 Temperature Probe measurement 'T108_C_2'
+		Therm108(T108_C_2,1,5,3,0,_60Hz,1,0)
+		'108 Temperature Probe measurement 'T108_C_3'
+		Therm108(T108_C_3,1,6,3,0,_60Hz,1,0)
+		'Generic Single-Ended Voltage measurements 'nivel_tanque'
+		VoltSE(nivel_tanque,1,mV5000,9,True,0,_60Hz,0.2,-0.8202324)
+		'HMP45C (7-wire, cable switched power) Temperature & Relative Humidity Sensor measurements 'AirTC' and 'RH'
+		PortSet(1,1)
+		Delay(0,150,mSec)
+		VoltSE(AirTC,1,mV2500,7,0,0,_60Hz,0.1,-40)
+		VoltSE(RH,1,mV2500,8,0,0,_60Hz,0.1,0)
+		PortSet(1,0)
+		If RH>100 And RH<108 Then RH=100
+		'LI200X Pyranometer measurements 'irradiacaototal' and 'irradiancia_licor'
+		VoltDiff(irradiancia_licor,1,mV7_5,6,True,0,_60Hz,1,0)
+		If irradiancia_licor<0 Then irradiancia_licor=0
+		'Calculate total flux
+		'The multiplier to calculate total flux was calculated by Short Cut
+		'and based on a program execution rate (scan rate) of 20 Seconds.
+		'If you change the program execution rate outside of Short Cut with the CRBasic Editor
+		'you will need to recalculate this multiplier. See the sensor manual for more details.
+		irradiacaototal=irradiancia_licor*0.004
+		'Calculate flux density
+		irradiancia_licor=irradiancia_licor*200
+		'Call Data Tables and Store Data
+		CallTable dados_tanque
+	NextScan
+EndProg
