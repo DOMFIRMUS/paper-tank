@@ -21,7 +21,8 @@ code/
   process_evaporation.py      raw TOA5 -> consolidated series and window rates
   statistical_analysis.py     uncertainty, window-level model, tests, sensitivity
   coverage_check.py           simulation of confidence-interval coverage
-  make_figures.py             figures (vector PDF + 1000 dpi PNG)
+  make_figures.py             figures (vector PDF + 1200 dpi PNG)
+  make_fig01_schematic.py     schematic of the experimental system (Fig. 1)
   make_tables.py              formatted tables (docx, xlsx)
   requirements.txt
   datalogger/codigo_sensores_v8.CR1   CRBasic program run by the CR1000
@@ -50,7 +51,7 @@ pip install -r requirements.txt
 python run_all.py
 ```
 
-Requires Python ≥ 3.9 with numpy, pandas, scipy, statsmodels, matplotlib, python-docx and openpyxl. The full run takes about 5 minutes; about 4 of them are the coverage simulation. Random numbers use fixed seeds, so the results are reproducible. The 1000 dpi PNG versions of the figures are not versioned; `make_figures.py` writes them next to the PDFs.
+Requires Python ≥ 3.9 with numpy, pandas, scipy, statsmodels, matplotlib, python-docx and openpyxl. The full run takes about 5 minutes; about 4 of them are the coverage simulation. Random numbers use fixed seeds, so the results are reproducible. The 1200 dpi PNG versions of the figures are not versioned; `make_figures.py` writes them next to the PDFs.
 
 ---
 

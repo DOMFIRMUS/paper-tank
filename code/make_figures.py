@@ -5,9 +5,10 @@ MAISSER-PE - figures.
 
 Run after statistical_analysis.py (and coverage_check.py for figure S4).
 Every figure is written to ../results/figures/ as a vector PDF with embedded fonts
-(preferred by Elsevier for line art), a 1000 dpi PNG (the minimum Elsevier
+(preferred by Springer for line art), a 1200 dpi PNG (the minimum Springer
 accepts for bitmapped line art) and a 200 dpi preview. Widths follow the
-Elsevier grid: 90 mm (single column), 140 mm (1.5 column), 190 mm (full).
+Springer grid for large journals: 84 mm (one column), 174 mm (full width);
+129 mm is used for intermediate figures.
 
 Colour encodes one thing per figure and is always paired with a second
 channel (marker shape, fill or line style), using the Okabe-Ito palette,
@@ -29,13 +30,13 @@ from scipy import stats
 import maisser_core as mc
 
 MM = 1 / 25.4
-W1, W15, W2 = 90 * MM, 140 * MM, 190 * MM
+W1, W15, W2 = 84 * MM, 129 * MM, 174 * MM
 
 mpl.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["Arial", "Liberation Sans", "DejaVu Sans"],
-    "font.size": 7.5, "axes.titlesize": 8, "axes.labelsize": 8,
-    "xtick.labelsize": 7, "ytick.labelsize": 7, "legend.fontsize": 7,
+    "font.size": 8, "axes.titlesize": 8.5, "axes.labelsize": 8.5,
+    "xtick.labelsize": 8, "ytick.labelsize": 8, "legend.fontsize": 7.5,
     "axes.linewidth": 0.6, "xtick.major.width": 0.6, "ytick.major.width": 0.6,
     "xtick.major.size": 2.5, "ytick.major.size": 2.5,
     "lines.linewidth": 1.1, "lines.markersize": 4.5,
@@ -108,23 +109,24 @@ def pct_ci(x, a=0.05):
 
 
 def save(fig, name):
-    """Save at exactly the width the figure was created with (90, 140 or
-    190 mm). The tight bounding box adds or trims margins, so the canvas is
-    rescaled until the cropped figure has the target width; text sizes in
-    points are unaffected. Rasterised layers are written at 600 dpi in the PDF.
+    """Save at exactly the width the figure was created with (84, 129 or
+    174 mm). The tight bounding box adds or trims margins, and the PDF backend
+    measures text slightly differently from the raster one, so the canvas is
+    rescaled until the saved PDF page itself has the target width; text sizes
+    in points are unaffected. Rasterised layers are written at 600 dpi in the PDF.
     """
+    import pymupdf
     target = fig.get_size_inches()[0]
-    pad = mpl.rcParams["savefig.pad_inches"]
-    for _ in range(6):
-        fig.canvas.draw()
-        bb = fig.get_tightbbox(fig.canvas.get_renderer())
-        width = bb.width + 2 * pad
+    pdf = mc.FIGURES / f"{name}.pdf"
+    for _ in range(8):
+        fig.savefig(pdf, dpi=600)
+        with pymupdf.open(pdf) as d:
+            width = d[0].rect.width / 72
         if abs(width - target) < 0.2 * MM:
             break
         w, h = fig.get_size_inches()
         fig.set_size_inches(w * target / width, h)
-    fig.savefig(mc.FIGURES / f"{name}.pdf", dpi=600)
-    fig.savefig(mc.FIGURES / f"{name}.png", dpi=1000)
+    fig.savefig(mc.FIGURES / f"{name}.png", dpi=1200)
     fig.savefig(mc.FIGURES / f"{name}_preview.png", dpi=200)
     plt.close(fig)
     print(f"  {name}: {width / MM:.1f} mm wide")
@@ -179,11 +181,11 @@ def fig_method():
     post = day[(day.TIMESTAMP >= "2026-08-24 13:06") & (day.TIMESTAMP <= "2026-08-24 13:14")].nivel_tanque_Avg.mean()
     ax.annotate(f"buoyancy step +{post - pre:.1f} mm (13:04–13:05)",
                 xy=(pd.Timestamp("2026-08-24 13:05"), post), xytext=(pd.Timestamp("2026-08-24 13:50"), 221.6),
-                fontsize=6.5, color=INK2, arrowprops=dict(arrowstyle="-", color=INK2, lw=0.6))
+                fontsize=7.3, color=INK2, arrowprops=dict(arrowstyle="-", color=INK2, lw=0.6))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     ax.set_ylabel("Water level (mm)")
     ax.set_xlabel("Local time, 24 August 2026")
-    ax.legend(loc="lower left", ncol=1, fontsize=6.5, markerscale=4)
+    ax.legend(loc="lower left", ncol=1, fontsize=7.3, markerscale=4)
     ax.set_ylim(214.2, 223.0)
     panel_label(ax, "(a) Rate by regression, buoyancy transient excluded (95 % CI: HAC-120, fixed-b)")
 
@@ -208,7 +210,7 @@ def fig_method():
     ax.set_ylim(-0.45, 1.02)
     ax.set_xlabel("Lag (min)")
     ax.set_ylabel("Autocorrelation of residuals")
-    ax.legend(loc="upper right", fontsize=6.3)
+    ax.legend(loc="upper right", fontsize=7.1)
     panel_label(ax, "(b) Residual dependence lasts tens of minutes")
 
     ax = fig.add_subplot(gs[1, 1])
@@ -227,9 +229,9 @@ def fig_method():
     ax.set_ylabel("30 min block rate (mm h$^{-1}$)")
     ax.text(1.0, 2.18, f"Mann–Whitney U = {r.MW_U:.0f}\nexact p = {fp(r.MW_p_exact)}\n"
                        f"HL shift {r.HL_shift:.2f} mm h$^{{-1}}$\n[{r.HL_lo:.2f}, {r.HL_hi:.2f}]",
-            fontsize=6.3, color=INK, ha="center", va="top")
+            fontsize=7.1, color=INK, ha="center", va="top")
     ax.text(0.02, 0.02, f"uncovered blocks rise in time: Spearman ρ = {r.trend_rho_uncovered:.2f}",
-            transform=ax.transAxes, fontsize=6.1, color=C_UNC, ha="left", va="bottom")
+            transform=ax.transAxes, fontsize=7.0, color=C_UNC, ha="left", va="bottom")
     panel_label(ax, "(c) Morning uncovered vs afternoon covered")
     save(fig, "figA_method_24Aug")
 
@@ -237,9 +239,9 @@ def fig_method():
 # ---------------------------------------------------------------------------
 def fig_rates():
     """Fig. 3 (revised): rate of every window with its 95 % CI, by regime."""
-    groups = [("Weak advection\n≈1.9–2.2 m s$^{-1}$", ["W01", "W02", "W03"]),
-              ("Strong advection\n3.2–3.6 m s$^{-1}$", ["W04", "W05", "W06", "W07", "W08", "W09", "W10", "W11"]),
-              ("No forced advection\nu = 0", ["W12", "W13", "W14", "W15"])]
+    groups = [("Weak regime\n≈1.9–2.2 m s$^{-1}$", ["W01", "W02", "W03"]),
+              ("Strong regime\n3.2–3.6 m s$^{-1}$", ["W04", "W05", "W06", "W07", "W08", "W09", "W10", "W11"]),
+              ("Fan off\nu = 0", ["W12", "W13", "W14", "W15"])]
     fig, axes = plt.subplots(1, 3, figsize=(W2, 72 * MM), sharey=True,
                              gridspec_kw={"width_ratios": [3.4, 8, 4.4], "wspace": 0.08})
     for i, (ax, (title, ws)) in enumerate(zip(axes, groups)):
@@ -251,7 +253,7 @@ def fig_rates():
             ax.errorbar(j, e, yerr=[[e - lo], [hi - e]], fmt="none", ecolor=INK, elinewidth=0.8, capsize=2, zorder=3)
         ax.set_xticks(range(len(ws)))
         ax.set_xticklabels([f"{dlab(w)}\n{'unc.' if state(w) == 'uncovered' else state(w)}\n"
-                            f"{wr.loc[w, 'Rs_W_m2']:.0f}" for w in ws], fontsize=6.5)
+                            f"{wr.loc[w, 'Rs_W_m2']:.0f}" for w in ws], fontsize=7.3)
         ax.set_xlim(-0.6, len(ws) - 0.4)
         ax.grid(axis="x", visible=False)
         panel_label(ax, f"({'abc'[i]}) {title}")
@@ -259,12 +261,12 @@ def fig_rates():
             ax.tick_params(axis="y", left=False)
     axes[0].set_ylabel("Evaporation rate (mm h$^{-1}$)")
     axes[0].set_ylim(0, 1.7)
-    axes[1].set_xlabel("Date | cover | SP-LITE reading (W m$^{-2}$)", fontsize=7, color=INK2)
+    axes[1].set_xlabel("Date | cover | SP-LITE reading (W m$^{-2}$)", fontsize=7.8, color=INK2)
     handles = [mpl.patches.Patch(color=STATE_STYLE[k]["color"], alpha=0.85, label=STATE_STYLE[k]["label"])
                for k in ("uncovered", "V1", "V2")]
     handles.append(mpl.lines.Line2D([], [], color=INK, lw=0.8, marker="_", ms=6,
-                                    label="95 % CI, measurement (HAC-120, fixed-b)"))
-    fig.legend(handles=handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.15))
+                                    label="95 % measurement interval (Newey–West, fixed-b)"))
+    fig.legend(handles=handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.22))
     save(fig, "fig03_rates_by_regime")
 
 
@@ -273,14 +275,14 @@ def fig_suppression():
     """Fig. 4 (revised): suppression per comparison and from the window-level
     model, and the weak-minus-strong contrast against a 10 pp margin."""
     fig = plt.figure(figsize=(W2, 118 * MM))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.5, 1], wspace=0.95)
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.45, 1], wspace=0.78)
     ax = fig.add_subplot(gs[0])
     ytr = ax.get_yaxis_transform()
     labels = {"C1": "C1  18 vs 17 Aug, weak", "C2": "C2  21 vs 20 Aug, strong", "C3": "C3  24 Aug paired, strong"}
     y, yt, ylab = 0.0, [], []
     for key, stl in NORM_STYLE.items():
         m = wm.loc[key]
-        ax.text(-0.02, y, f"{stl['label']}", transform=ytr, fontsize=6.9, fontweight="bold", color=INK,
+        ax.text(-0.02, y, f"{stl['label']}", transform=ytr, fontsize=7.7, fontweight="bold", color=INK,
                 va="center", ha="right")
         y += 1
         for cid in ("C1", "C2", "C3"):
@@ -288,7 +290,7 @@ def fig_suppression():
             errbar(ax, r.S_pct, y, r.ci_lo, r.ci_hi, stl, horizontal=True)
             yt.append(y)
             ylab.append(labels[cid])
-            ax.text(1.02, y, mn(f"{r.S_pct:.1f} [{r.ci_lo:.1f}, {r.ci_hi:.1f}]"), transform=ytr, fontsize=6.3,
+            ax.text(1.02, y, mn(f"{r.S_pct:.1f} [{r.ci_lo:.1f}, {r.ci_hi:.1f}]"), transform=ytr, fontsize=7.1,
                     va="center", color=INK2)
             y += 1
         for lab, c, lo, hi in (("Weak regime (model)", m.S_weak, m.S_weak_lo, m.S_weak_hi),
@@ -300,13 +302,13 @@ def fig_suppression():
                     else 0.45, lw=0)
             yt.append(y)
             ylab.append(lab)
-            ax.text(1.02, y, f"{c:.1f} [{lo:.1f}, {hi:.1f}]", transform=ytr, fontsize=6.3, va="center",
+            ax.text(1.02, y, f"{c:.1f} [{lo:.1f}, {hi:.1f}]", transform=ytr, fontsize=7.1, va="center",
                     color=INK, fontweight="bold" if lab.startswith("Pooled") else "normal")
             y += 1
         y += 0.7
-    ax.text(1.02, -0.9, "S [95 % CI]", transform=ytr, fontsize=6.3, color=INK2, va="center")
+    ax.text(1.02, -0.9, "S [95 % CI]", transform=ytr, fontsize=7.1, color=INK2, va="center")
     ax.set_yticks(yt)
-    ax.set_yticklabels(ylab, fontsize=6.4)
+    ax.set_yticklabels(ylab, fontsize=7.2)
     ax.set_ylim(y - 1.0, -1.4)
     ax.set_xlim(0, 95)
     ax.axvline(77.0, color=C_GREY, lw=0.6, ls=(0, (4, 3)))
@@ -315,8 +317,8 @@ def fig_suppression():
     hs = [mpl.lines.Line2D([], [], color=INK2, marker="o", mfc="white", lw=0.9, label="pair: measurement CI"),
           mpl.patches.Polygon([[0, 0]], closed=True, color=INK2, alpha=0.6, label="window-level model: 95 % CI"),
           mpl.lines.Line2D([], [], color=INK2, lw=0.8, ls=(0, (1, 1.2)), label="95 % prediction interval, new pair"),
-          mpl.lines.Line2D([], [], color=C_GREY, lw=0.6, ls=(0, (4, 3)), label="fractional cover 77 %")]
-    ax.legend(handles=hs, loc="upper left", fontsize=6.1, bbox_to_anchor=(-0.55, -0.1), ncol=2,
+          mpl.lines.Line2D([], [], color=C_GREY, lw=0.6, ls=(0, (4, 3)), label="covered fraction 77 %")]
+    ax.legend(handles=hs, loc="upper left", fontsize=7.0, bbox_to_anchor=(-0.55, -0.1), ncol=2,
               handlelength=1.6)
     panel_label(ax, "(a) Suppression by comparison and by regime")
 
@@ -328,20 +330,20 @@ def fig_suppression():
         ax.plot([m.diff90_lo, m.diff90_hi], [i, i], color=stl["color"], lw=3.4, alpha=0.45, solid_capstyle="butt")
         errbar(ax, m.diff_pp, i, m.diff_lo, m.diff_hi, stl, ms=5, horizontal=True)
         ax.text(1.03, i, mn(f"{m.diff_pp:+.1f} [{m.diff_lo:+.1f}, {m.diff_hi:+.1f}]") + f"\np = {m.interaction_p:.2f}",
-                transform=ytr, fontsize=6.3, va="center")
-    ax.text(1.03, -0.75, "ΔS [95 % CI]", transform=ytr, fontsize=6.3, color=INK2, va="center")
-    ax.text(-mc_margin() + 0.8, -0.75, f"±{mc_margin():.0f} pp margin", fontsize=6.0, color=INK2, ha="left",
+                transform=ytr, fontsize=7.1, va="center")
+    ax.text(1.03, -0.75, "ΔS [95 % CI]", transform=ytr, fontsize=7.1, color=INK2, va="center")
+    ax.text(-mc_margin() + 0.8, -0.75, f"±{mc_margin():.0f} pp margin", fontsize=7.0, color=INK2, ha="left",
             va="center", bbox=dict(facecolor="white", edgecolor="none", pad=0.6))
     ax.axvline(0, color=INK2, lw=0.7)
     ax.set_yticks(range(3))
-    ax.set_yticklabels([s["label"] for s in NORM_STYLE.values()], fontsize=6.6)
+    ax.set_yticklabels(["Raw", "VPD", "Δe"], fontsize=8.2)
     ax.set_ylim(2.8, -1.1)
     ax.set_xlim(-30, 50)
     ax.grid(axis="y", visible=False)
     ax.set_xlabel("S$_{weak}$ − S$_{strong}$ (percentage points)")
     ax.plot([], [], color=INK2, lw=3.4, alpha=0.45, label="90 % CI (equivalence test)")
     ax.plot([], [], color=INK2, lw=0.9, marker="|", ms=5, label="95 % CI")
-    ax.legend(loc="lower right", fontsize=6.1, handlelength=1.6, frameon=True, framealpha=1,
+    ax.legend(loc="lower right", fontsize=7.0, handlelength=1.6, frameon=True, framealpha=1,
               edgecolor="none")
     panel_label(ax, "(b) Regime effect, window-level model")
     save(fig, "fig04_suppression")
@@ -371,16 +373,16 @@ def fig_gamma():
             ax.plot(p.gamma, p[f"S_{cid}"], color=s["color"], ls=s["ls"], lw=1.3, label=s["label"])
         ax.plot(p.gamma, p.S_pooled, color=INK, lw=2.0, label="pooled, window-level model")
         ax.axvline(1.0, color=INK, lw=0.6, ls=(0, (4, 3)))
-        ax.text(0.96, 91, "γ = 1\n(assumed)", fontsize=6.2, color=INK2, va="top", ha="right")
+        ax.text(0.96, 91, "γ = 1\n(assumed)", fontsize=7.0, color=INK2, va="top", ha="right")
         ax.set_xlim(0, 3)
         ax.set_ylim(40, 95)
-        ax.set_xlabel("Elasticity γ in S = 1 − (E$_c$/E$_u$)(X$_u$/X$_c$)$^γ$")
+        ax.set_xlabel("Elasticity γ in S = 100[1 − (E$_c$/E$_u$)(X$_u$/X$_c$)$^γ$]")
         panel_label(ax, title)
     axes[0].set_ylabel("Suppression S (%)")
     hs, ls_ = axes[0].get_legend_handles_labels()
     hs += [mpl.patches.Patch(color="#BDBDBD", alpha=0.55, label="γ estimated, all blocks (PPML, 95 % CI)"),
            mpl.patches.Patch(color="#F2D3C2", alpha=0.6, label="γ estimated, uncovered blocks")]
-    fig.legend(handles=hs, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.2), fontsize=6.4)
+    fig.legend(handles=hs, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.2), fontsize=7.2)
     save(fig, "figC_gamma_profile")
 
 
@@ -389,7 +391,7 @@ def fig_elasticity():
     """Within-window elasticity of the rate to VPD and to dE (60 min blocks)."""
     b = blocks60[blocks60.E > 0].copy()        # log scale for display; the fit (PPML) uses all blocks
     b["lnE"] = np.log(b.E)
-    fig, axes = plt.subplots(1, 2, figsize=(W15, 72 * MM), sharey=True, gridspec_kw={"wspace": 0.12})
+    fig, axes = plt.subplots(1, 2, figsize=(W2, 80 * MM), sharey=True, gridspec_kw={"wspace": 0.08})
     for ax, (drv, col, title) in zip(axes, (("VPD", "VPD_kPa", "(a) Air deficit VPD"),
                                             ("dE", "dE_kPa", "(b) Surface–air difference Δe"))):
         b["lnX"] = np.log(b[col])
@@ -412,7 +414,14 @@ def fig_elasticity():
         ax.set_ylim(-1.6, 1.6)
         ax.set_xlabel(f"ln {'VPD' if drv == 'VPD' else 'Δe'} − window mean")
         panel_label(ax, title)
-        ax.legend(loc="upper left", fontsize=6.0, handlelength=1.6)
+        hs, ls_ = ax.get_legend_handles_labels()
+        keep = [i for i, l in enumerate(ls_) if "γ" in l]
+        ax.legend([hs[i] for i in keep], [ls_[i] for i in keep], loc="upper left", fontsize=7.0,
+                  handlelength=1.6)
+    hs, ls_ = axes[0].get_legend_handles_labels()
+    keep = [i for i, l in enumerate(ls_) if "γ" not in l]
+    fig.legend([hs[i] for i in keep], [ls_[i] for i in keep], loc="lower center", ncol=3,
+               bbox_to_anchor=(0.5, -0.1))
     axes[0].set_ylabel("ln E − window mean  (60 min blocks)")
     save(fig, "figB_elasticity")
 
@@ -431,7 +440,7 @@ def fig_advection():
     r = advc[(advc.contrast.str.startswith("covered V2-26")) & (advc.normaliser == "none")].iloc[0]
     ax.annotate("", xy=(1, 0.40), xytext=(0, 0.40), arrowprops=dict(arrowstyle="<->", color=INK, lw=0.8))
     ax.text(0.5, 0.415, f"×{r.ratio:.2f}\nmeasurement [{r.meas_lo:.2f}, {r.meas_hi:.2f}]\n"
-                        f"between-day [{r.window_lo:.2f}, {r.window_hi:.2f}]", ha="center", fontsize=6.3)
+                        f"between-day [{r.window_lo:.2f}, {r.window_hi:.2f}]", ha="center", fontsize=7.1)
     ax.set_xticks([0, 1])
     ax.set_xticklabels([f"26 Aug\n{wr.loc['W09', 'Rs_W_m2']:.0f} W m$^{{-2}}$\nu = {wr.loc['W09', 'u_m_s']:.2f} m s$^{{-1}}$",
                         f"2 Sep\n{wr.loc['W14', 'Rs_W_m2']:.0f} W m$^{{-2}}$\nu = 0"])
@@ -461,15 +470,15 @@ def fig_advection():
             ax.plot(wr.loc[w, "Rs_W_m2"], e, marker="o" if filled else "s", ms=5, mfc=C_V2 if filled else "white",
                     mec=C_V2, mew=1.0, lw=0)
             ax.annotate(dlab(w), (wr.loc[w, "Rs_W_m2"], e), xytext=offs[w], textcoords="offset points",
-                        fontsize=6.2, color=INK2)
+                        fontsize=7.0, color=INK2)
         ax.plot([], [], color=C_V2, marker="o" if filled else "s", ls="none" if filled else (0, (4, 2)),
                 mfc=(C_V2 if filled else "white"), label=f"{lab} (n = {len(d)}): R² = {rr.R2:.2f}, p = {rr.p:.2f}")
     ax.set_xlim(100, 1000)
     ax.set_ylim(0, 0.55)
     ax.set_xlabel("SP-LITE reading (W m$^{-2}$; silicon band, not total lamp radiation)")
     ax.set_ylabel("Evaporation rate (mm h$^{-1}$)")
-    ax.legend(loc="upper left", fontsize=6.2)
-    panel_label(ax, "(b) Covered rate against the irradiance index")
+    ax.legend(loc="upper left", fontsize=7.0)
+    panel_label(ax, "(b) Covered rate against the lamp-output index")
     save(fig, "fig05_advection")
 
 
@@ -496,7 +505,7 @@ def fig_energy():
                 mec=stl["color"], mew=1.0, lw=0)
         if wr.loc[w, "regime"] == "weak":
             xy = {"W01": (30, 170), "W03": (240, 405), "W02": (178, 35)}[w]
-            ax.text(*xy, f"{dlab(w)} (weak fan)", fontsize=6.0, color=INK2, ha="left", va="center")
+            ax.text(*xy, f"{dlab(w)} (weak fan)", fontsize=7.0, color=INK2, ha="left", va="center")
     hs = [mpl.lines.Line2D([], [], color=STATE_STYLE[k]["color"], marker=STATE_STYLE[k]["marker"], lw=0,
                            label=STATE_STYLE[k]["label"]) for k in ("uncovered", "V1", "V2")]
     hs += [mpl.lines.Line2D([], [], color=INK2, marker="o", lw=0, label="fan on (filled)"),
@@ -504,12 +513,12 @@ def fig_energy():
            mpl.lines.Line2D([], [], color=INK2, marker="^", mfc="white", ls=(0, (1, 1.2)), lw=0.7,
                             label="LE + heat storage G (probe 1)"),
            mpl.lines.Line2D([], [], color=INK2, marker="|", ms=6, lw=0, label="95 % CI of LE")]
-    ax.legend(handles=hs, loc="upper left", bbox_to_anchor=(1.02, 1.0), fontsize=6.4)
+    ax.legend(handles=hs, loc="upper left", bbox_to_anchor=(1.02, 1.0), fontsize=7.2)
     ax.set_xlim(0, 1000)
     ax.set_ylim(0, 1450)
     ax.set_xlabel("SP-LITE reading (W m$^{-2}$; silicon band)")
     ax.set_ylabel("Latent heat flux LE (W m$^{-2}$)")
-    panel_label(ax, "LE and heat storage against the irradiance index")
+    panel_label(ax, "LE and heat storage against the lamp-output index")
     save(fig, "fig06_LE_vs_irradiance_index")
 
 
@@ -524,7 +533,7 @@ def fig_26_28():
         e = wr.loc[w, "E_mm_h"]
         errbar(ax, wr.loc[w, "Rs_W_m2"], e, lo, hi, STATE_STYLE["V2"], ms=5)
         ax.annotate(f"{dlab(w)}\nVPD {wr.loc[w, 'VPD_kPa']:.2f} kPa\nΔe {wr.loc[w, 'dE_kPa']:.2f} kPa",
-                    (wr.loc[w, "Rs_W_m2"], e), xytext=(8, -4), textcoords="offset points", fontsize=6.2,
+                    (wr.loc[w, "Rs_W_m2"], e), xytext=(8, -4), textcoords="offset points", fontsize=7.0,
                     color=INK2, va="top")
     ax.set_xlim(200, 900)
     ax.set_ylim(0.18, 0.42)
@@ -551,7 +560,7 @@ def fig_26_28():
     ax.set_ylim(0.6, 1.3)
     ax.grid(axis="x", visible=False)
     ax.set_ylabel("Value / mean of the three windows")
-    ax.legend(loc="upper left", fontsize=6.3)
+    ax.legend(loc="upper left", fontsize=7.1)
     panel_label(ax, "(b) Raw and normalised rates, indexed to their mean")
     save(fig, "fig07_26-28Aug")
 
@@ -569,7 +578,7 @@ def fig_v1_v2():
         ax.bar(i, e, width=0.6, color=st["color"], alpha=0.85, edgecolor="white", zorder=2)
         ax.errorbar(i, e, yerr=[[e - lo], [hi - e]], fmt="none", ecolor=INK, elinewidth=0.8, capsize=2, zorder=3)
     ax.set_xticks(range(3))
-    ax.set_xticklabels(["Uncovered\n24 Aug", "Cover V1\n24 Aug", "Cover V2\n25 Aug"], fontsize=6.6)
+    ax.set_xticklabels(["Uncov.\n24 Aug", "V1\n24 Aug", "V2\n25 Aug"], fontsize=8)
     ax.set_ylabel("Evaporation rate (mm h$^{-1}$)")
     ax.set_ylim(0, 1.7)
     ax.grid(axis="x", visible=False)
@@ -589,7 +598,7 @@ def fig_v1_v2():
     ax.set_yticklabels(["V1\n24 Aug", "V2\n25 Aug"])
     ax.axvspan(data[1].max(), data[0].min(), color="#F2E0D6", alpha=0.8, lw=0)
     ax.text(0.5 * (data[1].max() + data[0].min()), 0.5, f"gap\n{data[0].min() - data[1].max():.1f} K",
-            ha="center", va="center", fontsize=6.3, color="#8A4B2A")
+            ha="center", va="center", fontsize=7.1, color="#8A4B2A")
     ax.set_xlabel("Water temperature, probe 1 (°C)")
     ax.grid(axis="y", visible=False)
     panel_label(ax, "(b) No overlap in thermal state")
@@ -599,17 +608,17 @@ def fig_v1_v2():
         r = advc[(advc.contrast.str.startswith("cover V2 (25 Aug)")) & (advc.normaliser == key)].iloc[0]
         ax.plot([r.window_lo, r.window_hi], [i, i], color=stl["color"], lw=4.0, alpha=0.3, solid_capstyle="butt")
         errbar(ax, r.ratio, i, r.meas_lo, r.meas_hi, stl, ms=5, horizontal=True)
-        ax.text(1.03, i, f"{r.ratio:.2f}\n[{r.window_lo:.2f}, {r.window_hi:.2f}]", fontsize=6.3, va="center",
+        ax.text(1.03, i, f"{r.ratio:.2f}\n[{r.window_lo:.2f}, {r.window_hi:.2f}]", fontsize=7.1, va="center",
                 ha="left", transform=ax.get_yaxis_transform())
     ax.axvline(1, color=INK2, lw=0.7)
     ax.set_yticks(range(3))
     ax.set_yticklabels(["Raw", "VPD-norm.", "Δe-norm."])
-    ax.set_ylim(2.6, -0.6)
+    ax.set_ylim(3.3, -0.6)
     ax.set_xlim(0.25, 1.85)
     ax.set_xlabel("Rate ratio V2 / V1")
     ax.plot([], [], color=INK2, lw=0.9, marker="|", ms=5, label="measurement 95 % CI")
     ax.plot([], [], color=INK2, lw=4.0, alpha=0.3, label="between-day 95 % CI")
-    ax.legend(loc="lower right", fontsize=5.9, handlelength=1.4)
+    ax.legend(loc="lower center", fontsize=7.0, handlelength=1.4, ncol=1, borderaxespad=0.2)
     ax.grid(axis="y", visible=False)
     panel_label(ax, "(c) V2 relative to V1")
     save(fig, "fig08_V1_V2_thermal")
@@ -631,7 +640,7 @@ def fig_micrometer():
     ax.text(0.02, 0.585, f"Lin CCC {a_raw.ccc:.2f} → {a_m.ccc:.2f}\n[{a_m.ccc_lo:.2f}, {a_m.ccc_hi:.2f}]\n"
                          f"mean ratio {a_raw.geo_mean_ratio:.2f} → {a_m.geo_mean_ratio:.2f}\nn = {int(a_m.n)} intervals ≥ 2 h\n"
                          "open: as read (height)\nfilled: mass-equivalent",
-            fontsize=6.2, va="top")
+            fontsize=7.0, va="top")
     ax.set_xlim(0, 0.6)
     ax.set_ylim(0, 0.6)
     ax.set_aspect("equal")
@@ -646,9 +655,9 @@ def fig_micrometer():
     for v in (a_m.loa_lo, a_m.loa_hi):
         ax.axhline(v, color=INK2, lw=0.7, ls=(0, (4, 3)))
     ax.axhline(0, color="#BDBDBD", lw=0.6)
-    ax.text(0.06, a_m.bias_mm_h + 0.008, mn(f"bias {a_m.bias_mm_h:+.3f}"), fontsize=6.2, ha="left")
-    ax.text(0.06, a_m.loa_hi + 0.008, mn(f"+1.96 SD: {a_m.loa_hi:+.3f}"), fontsize=6.2, ha="left", color=INK2)
-    ax.text(0.06, a_m.loa_lo - 0.022, mn(f"-1.96 SD: {a_m.loa_lo:+.3f}"), fontsize=6.2, ha="left", color=INK2)
+    ax.text(0.06, a_m.bias_mm_h + 0.008, mn(f"bias {a_m.bias_mm_h:+.3f}"), fontsize=7.0, ha="left")
+    ax.text(0.06, a_m.loa_hi + 0.008, mn(f"+1.96 SD: {a_m.loa_hi:+.3f}"), fontsize=7.0, ha="left", color=INK2)
+    ax.text(0.06, a_m.loa_lo - 0.022, mn(f"-1.96 SD: {a_m.loa_lo:+.3f}"), fontsize=7.0, ha="left", color=INK2)
     ax.set_xlim(0.05, 0.5)
     ax.set_ylim(-0.2, 0.3)
     ax.set_xlabel("Mean of the two rates (mm h$^{-1}$)")
@@ -671,7 +680,7 @@ def fig_micrometer():
     ax.set_ylim(-0.12, 0.44)
     ax.set_xlabel("Warming rate of the water (K h$^{-1}$)")
     ax.set_ylabel("Transducer − micrometer (mm h$^{-1}$)")
-    ax.legend(loc="upper left", fontsize=6.0)
+    ax.legend(loc="upper left", fontsize=7.0)
     panel_label(ax, "(c) Difference against warming")
     save(fig, "figS1_micrometer_agreement")
 
@@ -698,7 +707,7 @@ def fig_sensitivity():
     ax.set_ylim(0.8, 1.2)
     ax.set_xlabel("Window start, minutes after the level step")
     ax.set_ylabel("Rate / adopted rate")
-    ax.legend(loc="upper right", fontsize=6.2)
+    ax.legend(loc="upper right", fontsize=7.0)
     panel_label(ax, "(a) Settling time")
 
     ax = fig.add_subplot(gs[1])
@@ -712,13 +721,13 @@ def fig_sensitivity():
             ax.plot([x, x], [r.S_p05, r.S_p95], color=stl["color"], lw=3.2, alpha=0.55, solid_capstyle="butt")
             ax.plot(x, r.S_baseline, marker=stl["marker"], mfc=stl["mfc"], mec=stl["color"], ms=4, lw=0)
     ax.set_xticks(range(4))
-    ax.set_xticklabels([labels[c] for c in ("C1", "C2", "C3", "C4")], fontsize=6.5)
+    ax.set_xticklabels([labels[c] for c in ("C1", "C2", "C3", "C4")], fontsize=7.3)
     ax.set_ylim(45, 82)
     ax.set_ylabel("Suppression S (%)")
     ax.grid(axis="x", visible=False)
     hs = [mpl.lines.Line2D([], [], color=s["color"], marker=s["marker"], mfc=s["mfc"], lw=0, label=s["label"])
           for s in NORM_STYLE.values()]
-    ax.legend(handles=hs, loc="lower left", fontsize=6.2)
+    ax.legend(handles=hs, loc="lower left", fontsize=7.0)
     panel_label(ax, "(b) Window bounds (256 variants)")
 
     ax = fig.add_subplot(gs[2])
@@ -730,7 +739,7 @@ def fig_sensitivity():
     ax.set_yticks(range(len(pairs)))
     ax.set_yticklabels([("24 Aug paired" if p.covered == "W07" and p.uncovered == "W06" else
                          f"{wr.loc[p.covered, 'start'].day}/{wr.loc[p.uncovered, 'start'].day} Aug")
-                        + f" ({p.regime})" for p in pairs.itertuples()], fontsize=6.2)
+                        + f" ({p.regime})" for p in pairs.itertuples()], fontsize=7.0)
     ax.set_ylim(len(pairs) - 0.5, -0.5)
     ax.set_xlim(35, 85)
     ax.set_xlabel("Suppression S (%)")
@@ -752,7 +761,7 @@ def fig_night():
              label="61 min running mean")
     ax1.set_ylabel("Level (mm)")
     ax1.tick_params(labelbottom=False)
-    ax1.legend(loc="upper right", fontsize=6.2)
+    ax1.legend(loc="upper right", fontsize=7.0)
     panel_label(ax1, "(a) Night of 1–2 Sep: covered, lamps and fan off")
     ax2 = fig.add_subplot(gs[1, 0], sharex=ax1)
     for col, lab, colr, ls in (("T108_C_Avg", "probe 1", INK, "-"), ("T108_C_2_Avg", "probe 2", "#6E6E6E", (0, (5, 2))),
@@ -760,7 +769,7 @@ def fig_night():
         ax2.plot(d.TIMESTAMP, d[col], color=colr, lw=1.0, ls=ls, label=lab)
     ax2.set_ylabel("Water T (°C)")
     ax2.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    ax2.legend(loc="upper right", fontsize=6.0, ncol=3)
+    ax2.legend(loc="upper right", fontsize=7.0, ncol=3)
     ax2.set_xlabel("Local time")
 
     ax = fig.add_subplot(gs[:, 1])
@@ -772,18 +781,18 @@ def fig_night():
         key = f"{r.start.day}/{r.start.month}"
         off = {"21/8": (5, 4), "28/8": (6, -9), "18/8": (-18, 4), "17/8": (-4, -10)}.get(key, (4, 2))
         ax.annotate(key, (r.dT1_dt_K_h, r.E_app_mm_h), xytext=off, textcoords="offset points",
-                    fontsize=5.8, color=INK2)
+                    fontsize=7.0, color=INK2)
     ax.axhline(0, color=INK2, lw=0.6)
     f6 = night_fit[(night_fit.subset.str.startswith("V2, 26")) & (night_fit.temperature == "dT1_dt_K_h")].iloc[0]
     f7 = night_fit[(night_fit.subset == "V2, all") & (night_fit.temperature == "dT1_dt_K_h")].iloc[0]
     ax.text(0.02, 0.98, f"E$_{{app}}$ = k Δe + c dT/dt\nV2, 26 plates (6 nights): c = {f6.c_mm_per_K:.2f} "
                         f"[{f6.c_lo:.2f}, {f6.c_hi:.2f}]\nall V2 (7 nights): c = {f7.c_mm_per_K:.2f} "
-                        f"[{f7.c_lo:.2f}, {f7.c_hi:.2f}]", transform=ax.transAxes, fontsize=6.1, va="top", ha="left")
+                        f"[{f7.c_lo:.2f}, {f7.c_hi:.2f}]", transform=ax.transAxes, fontsize=7.0, va="top", ha="left")
     hs = [mpl.lines.Line2D([], [], marker=m, color=c, lw=0, label={"uncovered": "uncovered", "V1": "cover V1",
                                                                     "V2": "cover V2, 26 plates"}[k])
           for k, (m, c) in mk.items()]
     hs.append(mpl.lines.Line2D([], [], marker="D", color=C_V2, mfc="white", lw=0, label="cover V2, 27 plates"))
-    ax.legend(handles=hs, loc="upper left", bbox_to_anchor=(1.02, 1.0), fontsize=6.0)
+    ax.legend(handles=hs, loc="upper left", bbox_to_anchor=(1.02, 1.0), fontsize=7.0)
     ax.set_ylim(-0.012, 0.15)
     ax.set_xlabel("dT/dt of the water, probe 1 (K h$^{-1}$)")
     ax.set_ylabel("Apparent night-time rate (mm h$^{-1}$)")
@@ -809,9 +818,9 @@ def fig_coverage():
         ax.plot(v, np.full(len(v), i) + np.linspace(-0.18, 0.18, len(v)), "o", ms=3, color=C_V1, alpha=0.6)
         ax.plot([np.median(v)] * 2, [i - 0.3, i + 0.3], color=INK, lw=1.4)
     ax.axvline(0.95, color=C_UNC, lw=0.8, ls=(0, (4, 3)))
-    ax.text(0.953, -0.7, "nominal 0.95", fontsize=6.2, color=C_UNC)
+    ax.text(0.953, -0.7, "nominal 0.95", fontsize=7.0, color=C_UNC)
     ax.set_yticks(range(len(meth)))
-    ax.set_yticklabels([m[1] for m in meth], fontsize=6.6)
+    ax.set_yticklabels([m[1] for m in meth], fontsize=7.4)
     ax.set_ylim(len(meth) - 0.5, -0.9)
     ax.set_xlim(0, 1)
     ax.set_xlabel("Empirical coverage of the 95 % interval for the rate (one point per window)")
